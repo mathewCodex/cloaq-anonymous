@@ -52,16 +52,31 @@ const createSubmission = asyncHandler(async (req, res) => {
  * @access  Private (Admin only)
  */
 const getAllSubmissions = asyncHandler(async (req, res) => {
-  const { viewed, flagged, search } = req.query;
-
+  const { viewed, flagged, search, sort } = req.query;
+  
+  // Base query to only get non-deleted items
   let query = { isDeleted: false };
 
-  if (viewed) query.isViewed = viewed === "true";
-  if (flagged && flagged !== "all") query.isFlagged = flagged;
-  if (search) query.textMessage = { $regex: search, $options: "i" };
-  //   if (search) query.receiptCode = { $regex: search, $options: "CLOAKK" };
+  // --- Filter Logic ---
+  if (viewed && viewed !== 'all') query.isViewed = viewed === 'true';
+  if (flagged && flagged !== 'all') query.isFlagged = flagged;
+  
+  // --- NEW: Keyword Search Logic ---
+  // If a search term is provided, add a regex query to search the textMessage
+  // The 'i' option makes the search case-insensitive
+  if (search) {
+    query.textMessage = { $regex: search, $options: 'i' };
+  }
 
-  const submissions = await Submission.find(query).sort({ createdAt: -1 });
+  // --- NEW: Sorting Logic ---
+  const sortOptions = {};
+  if (sort === 'createdAt_asc') {
+    sortOptions.createdAt = 1; // 1 for ascending
+  } else {
+    sortOptions.createdAt = -1; // -1 for descending (default)
+  }
+
+  const submissions = await Submission.find(query).sort(sortOptions);
   res.status(200).json(submissions);
 });
 
