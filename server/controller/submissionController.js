@@ -17,8 +17,9 @@ const generateReceiptCode = () => {
  */
 const createSubmission = asyncHandler(async (req, res) => {
   const { textMessage } = req.body;
+   
 
-  if (!textMessage) {
+      if (!textMessage) {
     res.status(400);
     throw new Error("Text message is required");
   }
@@ -44,6 +45,9 @@ const createSubmission = asyncHandler(async (req, res) => {
     message: "Submission received successfully.",
     receiptCode: submission.receiptCode,
   });
+    
+
+  
 });
 
 /**
@@ -107,21 +111,37 @@ const deleteSubmission = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Submission moved to bin" });
 });
 
-/**
- * @desc    Get all submissions in the bin
- * @route   GET /api/submissions/bin
- * @access  Private (Admin only)
- */
+
 const getDeletedSubmissions = asyncHandler(async (req, res) => {
   const submissions = await Submission.find({ isDeleted: true })
     .populate("deletedBy", "username")
     .sort({ deletedAt: -1 });
   res.status(200).json(submissions);
 });
+const updateSubmission = asyncHandler(async (req, res) => {
+  const { id } = req.params;   
+  const updates = req.body;    
 
+  // Find and update
+  const updated = await Submission.findByIdAndUpdate(
+    id,
+    updates,
+    { new: true, runValidators: true }  
+  );
+
+  if (!updated) {
+    return res.status(404).json({ message: "Submission not found" });
+  }
+
+  res.status(200).json({
+    message: "Submission updated successfully",
+    submission: updated,
+  });
+});
 module.exports = {
   createSubmission,
   getAllSubmissions,
   deleteSubmission,
+  updateSubmission,
   getDeletedSubmissions,
 };

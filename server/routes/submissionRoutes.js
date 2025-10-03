@@ -16,6 +16,7 @@ router.post(
   "/",
   timeRestriction,
   upload.single("file"),
+  // upload.array("images", 5),
   // fileCheck,
   scanAndUpload,
   createSubmission
@@ -24,7 +25,7 @@ router.post(
 // Admin-only routes for managing submissions
 router.get("/", protect, getAllSubmissions);
 router.get("/bin", protect, getDeletedSubmissions);
-// router.put("/:id", protect, updateSubmission);
+router.put("/:id", protect, updateSubmission);
 router.delete("/:id", protect, deleteSubmission);
 
 module.exports = router;

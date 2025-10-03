@@ -67,6 +67,7 @@ const buffer = req.file.buffer;
 
     const uniqueFilename = `${Date.now()}-${req.file.originalname}`;
     const filePath = path.join(uploadsDir, uniqueFilename);
+    
 
     // Write the file from buffer to the disk
     fs.writeFileSync(filePath, buffer);
